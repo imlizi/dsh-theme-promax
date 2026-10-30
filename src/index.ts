@@ -3,6 +3,6 @@
  * exists so the Host loader can import the package at all; it registers
  * nothing and disposes nothing.
  */
-export const name = 'dsh-skin-promax'
+export const name = 'dsh-theme-promax'
 
 export function apply() {}

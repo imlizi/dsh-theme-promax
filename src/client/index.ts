@@ -41,7 +41,7 @@ function capability<T extends object, K extends keyof T & string>(
   const value = target?.[key]
   if (value === undefined) {
     console.warn(
-      `[dsh-skin-promax] 宿主未提供 ${key}（${reason}）。皮肤已降级，应用启动不受影响。`,
+      `[dsh-theme-promax] 宿主未提供 ${key}（${reason}）。皮肤已降级，应用启动不受影响。`,
     )
   }
   return value
@@ -56,14 +56,14 @@ function capability<T extends object, K extends keyof T & string>(
 export function apply(ctx: Context): void {
   ctx.effect(() => {
     const tag = document.createElement('style')
-    tag.dataset.plugin = 'dsh-skin-promax'
+    tag.dataset.plugin = 'dsh-theme-promax'
     tag.textContent = css
     document.head.appendChild(tag)
     return () => { tag.remove() }
   }, 'skin: stylesheet')
 
   ctx.effect(
-    () => ctx.theme.overrideTokens('dsh-skin-promax', SKIN_TOKENS),
+    () => ctx.theme.overrideTokens('dsh-theme-promax', SKIN_TOKENS),
     'skin: alias tokens',
   )
 

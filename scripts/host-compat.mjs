@@ -8,7 +8,7 @@
  * whole window refused to start:
  *
  *   web boot: 1 entry did not activate
- *   dsh-skin-promax: failed
+ *   dsh-theme-promax: failed
  *
  * A cosmetic plugin must never be able to do that, so `apply` now probes every
  * capability it cannot prove at author time. This test pins that behaviour down

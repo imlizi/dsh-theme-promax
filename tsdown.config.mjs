@@ -71,7 +71,7 @@ const clientFace = {
     alwaysBundle: specifier => !isPlatform(specifier),
   },
   outputOptions: {
-    banner: 'window.__ModuleLoader__.load({ id: "dsh-skin-promax", factory: (require) => {',
+    banner: 'window.__ModuleLoader__.load({ id: "dsh-theme-promax", factory: (require) => {',
     intro: 'var module = { exports: {} }; var exports = module.exports;',
     footer: 'return module.exports;\n} });',
   },

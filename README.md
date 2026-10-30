@@ -1,4 +1,4 @@
-# dsh-skin-promax
+# dsh-theme-promax
 
 Desktop UI skin for dsh: a 1:1 reproduction of the reference first screen and
 sidebar (`reference/screenshot.png`, 2604×1480 at DPR 2 → 1302×740 CSS).
@@ -11,7 +11,7 @@ is installed into a profile rather than built into the app.
 
 | Surface | Mechanism | Notes |
 |---|---|---|
-| Palette, radii, elevation | `ctx.theme.overrideTokens('dsh-skin-promax', …)` | Alias tokens only; both schemes are always written |
+| Palette, radii, elevation | `ctx.theme.overrideTokens('dsh-theme-promax', …)` | Alias tokens only; both schemes are always written |
 | Blank-session hero stack | `conversation.hero.content` slot | Needs the upstream seat added in `packages/client/ui-conversation` |
 | Composer card | CSS variables + `[data-composer-card]` | The real `InputBar` stays mounted: IME, `@`, `/`, drag-drop and the queue are untouched |
 | Sidebar shell | composition: `ui-sidebar` row disabled, this bundle registers `sidebar` | Planned (S3); the inner `sidebar.*` seats stay owned by their packages |
@@ -35,10 +35,10 @@ Outputs:
 ## Install
 
 ```sh
-dsh plugin --profile desktop add /Users/zctech/Code/dsh-skin-promax
+dsh plugin --profile desktop add /Users/zctech/Code/dsh-theme-promax
 ```
 
-Reopen the app. Remove with `dsh plugin --profile desktop remove dsh-skin-promax`.
+Reopen the app. Remove with `dsh plugin --profile desktop remove dsh-theme-promax`.
 
 For a source checkout, `pnpm dsh web --patch ./cordis.patch.yml` loads the same
 bundle without touching the profile.
@@ -59,7 +59,7 @@ chips 346×34 at y 427; workspace tray 736×56 at y 594.
   not submit.
 - `conversation.hero.content` replaces the shipped fish + headline block, so the
   `conversation.hero.brand.mark` seat is unused while this skin is active.
-- Copy lives in the skin's own `skin.promax` namespace (zh + en). Other
+- Copy lives in the skin's own `theme.promax` namespace (zh + en). Other
   locales fall back to English.
 - The composer is restyled, not rebuilt: any value still hardcoded in
   `InputBar.module.css` will drift by a few pixels until it is parameterized

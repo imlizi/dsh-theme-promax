@@ -1,4 +1,4 @@
-/** Copy owned by the skin's own locale namespace (`skin.promax`). */
+/** Copy owned by the skin's own locale namespace (`theme.promax`). */
 export const zh = {
   'hero.title': '你想构建什么?',
   'hero.chip.intro': '介绍这个项目',
@@ -19,4 +19,4 @@ export const en = {
   'hero.prompt.summary': 'Summarize recent changes',
 }
 
-export const NS = 'skin.promax'
+export const NS = 'theme.promax'
