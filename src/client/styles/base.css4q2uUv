@@ -1,0 +1,212 @@
+/*
+ * Skin stylesheet. Injected as one owned <style> element and removed with the
+ * fiber.
+ *
+ * Two selector families live here:
+ *   1. `.skin-*` classes and `--skin-*` variables — the skin's own markup.
+ *   2. `[data-*]` hooks and `[class*='_name']` suffixes — the shell's markup.
+ *      The build prefixes every CSS-module class with a per-build hash
+ *      (`atLKnG_composerStack`), so the readable suffix is the stable part and
+ *      the hash never appears here. Every rule in family 2 is scoped under
+ *      `[data-conversation-content][data-content-phase='hero']`, so it can only
+ *      ever reach the blank-session composer.
+ *
+ * Reference geometry (CSS px at 1302x740) is recorded next to each value.
+ */
+
+:root {
+  --skin-sidebar-width: 240.5px;
+  --skin-sidebar-bg: #FBFBFB;
+  --skin-main-bg: #FFFFFF;
+  --skin-text: #0D0D0D;
+  --skin-text-muted: #777777;
+  --skin-border: #F0F0F0;
+  --skin-tile: #FFFFFF;
+  --skin-tile-size: 110px;
+  --skin-tile-radius: 28px;
+  --skin-mark: #515151;
+  --skin-chip-h: 34px;
+  --skin-chip-radius: 10px;
+  --skin-chip-gap: 8.5px;
+
+  /* Vertical anchors, all measured off the reference screenshot. */
+  --skin-hero-top: 213.75px; /* brand tile top */
+  --skin-hero-title-gap: 38.55px; /* tile bottom → headline box top */
+  --skin-hero-chips-gap: 32.3px; /* headline box bottom → chips top */
+  --skin-composer-card-width: 735px; /* card outer width */
+  --skin-composer-tray-width: 708px; /* tray outer width, 13.5 inside the card */
+  --skin-composer-tray-h: 56px;
+  --skin-composer-overlap: 18px; /* card rides over the tray's lower edge */
+  --skin-composer-floor: 17.5px; /* card bottom → viewport bottom */
+}
+
+/* ---- blank-session hero ------------------------------------------------- */
+
+.skin-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0;
+}
+
+.skin-hero__tile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--skin-tile-size);
+  height: var(--skin-tile-size);
+  border-radius: var(--skin-tile-radius);
+  background: var(--skin-tile);
+  color: var(--skin-mark);
+  /* The reference tile is white on white: only a symmetric ambient shadow
+     separates it, ~10px of spread on every side. */
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+}
+
+.skin-logo {
+  display: block;
+}
+
+.skin-hero__title {
+  margin-top: var(--skin-hero-title-gap);
+  /* The reference headline's ink sits 6.25px left of the column centre (its
+     own layout reserves a trailing element the screenshot does not show). A
+     12.5px trailing inset reproduces that offset without moving the ink's
+     vertical position. */
+  margin-right: 12.5px;
+  font-size: 26.7px;
+  line-height: 1.2;
+  /* 500, not 600: at the same ink box the reference carries 4975 dark pixels
+     and 600 renders 6658, i.e. the shipped semibold is a full step too heavy. */
+  font-weight: 500;
+  letter-spacing: -0.2px;
+  color: var(--skin-text);
+}
+
+.skin-hero__chips {
+  display: flex;
+  align-items: center;
+  gap: var(--skin-chip-gap);
+  margin-top: var(--skin-hero-chips-gap);
+}
+
+.skin-hero__chip {
+  box-sizing: border-box;
+  height: var(--skin-chip-h);
+  padding: 0 9.75px;
+  border: 1px solid var(--skin-border);
+  border-radius: var(--skin-chip-radius);
+  background: #FFFFFF;
+  color: var(--skin-text-muted);
+  font-size: 12px;
+  line-height: 32px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background-color 120ms ease, border-color 120ms ease;
+}
+
+.skin-hero__chip:hover {
+  background: #F7F7F7;
+  border-color: #E6E6E6;
+}
+
+/* ---- blank-session shell layout ---------------------------------------- */
+
+/* The shipped hero phase centres the whole stack (hero + tray + card) in the
+   scroll body. The reference splits it: the hero block is anchored near the top
+   and the composer is docked to the floor. Re-anchoring is a layout change, so
+   every rule below is scoped to the hero phase and unwinds with the fiber. */
+
+/* The blank-session header is 40px of in-flow chrome above the body, which
+   would push every anchor below it down by that much. The reference keeps the
+   header's top-right controls but lets the body start at the window's top edge,
+   so the header becomes an overlay: same controls, no band. */
+[class*='_root']:has(> [data-conversation-content][data-content-phase='hero'])
+  header[data-window-drag] {
+  position: absolute;
+  inset: 0 0 auto;
+  min-height: 0;
+  border-bottom: none;
+  background: transparent;
+}
+
+[data-conversation-content][data-content-phase='hero'] [data-conversation-scroll] {
+  justify-content: flex-start;
+  /* The 2px edge offset and the reserved gutter both shift the composer's
+     centre off the reference's; the hero phase has nothing to scroll. */
+  margin-right: 0;
+  scrollbar-gutter: auto;
+}
+
+/* Let the seat take the whole column so its children can be split top/bottom. */
+[data-conversation-content][data-content-phase='hero']
+  [data-conversation-scroll] > [data-composer-seat] {
+  flex: 1;
+  min-height: 0;
+}
+
+[data-conversation-content][data-content-phase='hero'] [class*='_composerStack'] {
+  flex: 1;
+  min-height: 0;
+  gap: 0;
+  padding-bottom: var(--skin-composer-floor);
+  --dsh-composer-card-max-width: var(--skin-composer-card-width);
+}
+
+/* HeroShell's own root: stop filling the column and shrink-wrap instead, so the
+   tray and card can be pushed to the floor by the auto margin below. */
+[data-conversation-content][data-content-phase='hero']
+  [class*='_composerStack'] > :first-child {
+  flex: none;
+  height: auto;
+  padding: var(--skin-hero-top) 24px 0;
+  margin-bottom: auto;
+}
+
+/* Workspace tray: a filled pill the card overlaps, not a bare control row.
+   It sits in the stack (card + two side clearances), so its inset is the
+   clearance plus half the width difference to the card. */
+[data-conversation-content][data-content-phase='hero'] [class*='_heroWorkspaceRow'] {
+  box-sizing: border-box;
+  height: var(--skin-composer-tray-h);
+  margin: 0 calc(
+    var(--dsh-composer-side-clearance)
+    + (var(--skin-composer-card-width) - var(--skin-composer-tray-width)) / 2
+  );
+  /* The card covers the tray's lower edge, so the label centres in the visible
+     38px band rather than the full 56px pill. */
+  padding: 0 14px var(--skin-composer-overlap);
+  border-radius: 16px;
+  background: #F3F3F3;
+}
+
+/* Pull the card up under the tray's lower edge. The slot renderer wraps the bar
+   in a `display: contents` div, which generates no box and therefore ignores
+   margins, so the offset has to land on the bar's own root. */
+[data-conversation-content][data-content-phase='hero']
+  [class*='_composerStack'] [class*='_root'][class*='_hero'] {
+  margin-top: calc(-1 * var(--skin-composer-overlap));
+}
+
+/* The hero card is one text line tall in the reference, so it takes a shorter
+   floor than the shipped two-line hero floor, and its send circle is 28. */
+[data-conversation-content][data-content-phase='hero']
+  [class*='_root'][class*='_hero'] [class*='_input'] {
+  min-height: 34.5px;
+}
+
+[data-conversation-content][data-content-phase='hero']
+  [data-composer-card] [class*='_primary'] {
+  width: 28px;
+  height: 28px;
+}
+
+/* Empty composer: the reference's send circle is a neutral grey disc with a
+   grey arrow, not the shipped disabled-blue at 40% opacity. */
+[data-conversation-content][data-content-phase='hero']
+  [data-composer-card] [class*='_primary']:disabled {
+  background: #F1F1F1;
+  color: #777777;
+  opacity: 1;
+}
