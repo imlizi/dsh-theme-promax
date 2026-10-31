@@ -94,13 +94,12 @@ pnpm watch      # 监听重建
 src/
   index.ts              Host 半边（空实现，只为让加载器能 import）
   client/
-    index.ts            挂载入口：样式表、token、字典、图标、hero 插槽
+    index.ts            挂载入口：样式表、token、字典、图标
     theme.ts            别名 token 表（亮/暗）
     locales.ts          theme.promax 字典
     icons.ts            sprite 图标覆盖表
     sprite-data.ts      图标路径数据
     styles/base.css     皮肤样式表
-    hero/               首屏 hero 组件与标记
 cordis.patch.yml        插入 theme-promax 插件行的配置层
 scripts/                量取参考图、截图、像素比对的辅助脚本
 ```
@@ -110,7 +109,7 @@ scripts/                量取参考图、截图、像素比对的辅助脚本
 | 界面 | 机制 |
 |---|---|
 | 配色、圆角、阴影 | `ctx.theme.overrideTokens('dsh-theme-promax', …)`，只改别名 token |
-| 首屏 hero | 占用 `conversation.hero.content` 插槽 |
+| 首屏 hero | 只做布局：`[data-content-phase='hero']` 作用域下的 CSS 把 hero 块上提、输入卡贴底；标题与鱼标由宿主渲染 |
 | 输入卡片 | CSS 变量 + `[data-composer-card]` |
 | 重命名弹窗 | `[role='dialog']:has(input[class*='_renameInput'])` 作用域下的 CSS |
 | 删除确认 | 同一组规则，选择器扩成 `:is(:has(input…), :has(button[class*='_deleteAction']))`；只有删除弹窗专属的部分（说明行、红底按钮）单列 |
@@ -121,8 +120,7 @@ scripts/                量取参考图、截图、像素比对的辅助脚本
 
 ## 已知差异
 
-- 建议 chip 只把草稿写进输入框（`inputActions.setDraft`），不会直接提交。
-- `conversation.hero.content` 顶掉了默认的图标 + 标题块，所以皮肤启用期间 `conversation.hero.brand.mark` 座位是空转的。
+- 首屏不再注入任何内容：宿主已移除 `conversation.hero.content` 座位（现只有 `hero.workspace` / `hero.brand.mark` / `hero.agentPreset` / `hero.options`），皮肤只重排 hero 阶段的布局，标题与鱼标仍由宿主绘制。
 - 输入卡片是重绘而非重建：`InputBar.module.css` 里仍写死的数值会有几像素偏差，需要上游参数化才能对齐。
 - 参考图只画了重命名弹窗；删除确认是照同一张卡片推出来的（420 宽、16 圆角、20 内边距、20px 标题、14px 灰色说明、32 高按钮），高度随内容为 156，没有参考图可对。
 - 添加插件卡从上游的 560 宽收到 420（与其余弹窗同宽），只有安装**过程**里的向导屏保留 560：它滚动的是 pnpm 原始输出，行不折行，收窄会把日志挤碎。向导与表单共用 `_installDialog` 类，靠 `:has([class*='_wizard'])` 单独放行。

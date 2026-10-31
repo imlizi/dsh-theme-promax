@@ -1,12 +1,10 @@
 import type { Context } from '@deepseek-ai/cordis'
-import type {} from '@deepseek-ai/dsh-client-ui-renderer/client'
 import type {} from '@deepseek-ai/dsh-client-ui-theme/client'
 import type {} from '@deepseek-ai/dsh-client-locale/client'
 import css from './styles/base.css'
 import { SKIN_TOKENS } from './theme.ts'
 import { NS, en, zh } from './locales.ts'
 import { ICON_OVERRIDES, installIconOverrides } from './icons.ts'
-import { HeroContent } from './hero/HeroContent.tsx'
 
 /**
  * Services this browser half needs before it can contribute UI.
@@ -15,14 +13,15 @@ import { HeroContent } from './hero/HeroContent.tsx'
  * cannot activate as fatal for the whole window (`web boot: 1 entry did not
  * activate`), so nothing goes on this list that the skin does not call. The
  * skin reaches ui-layout's markup through CSS only, which is why `layout` is
- * not here.
+ * not here; it no longer registers any slot occupant, which is why `slots` is
+ * not here either.
  */
-export const inject = ['slots', 'theme', 'locale']
+export const inject = ['theme', 'locale']
 
 /**
- * Mount the skin: one owned stylesheet, one token-override layer, and the
- * seats that replace shipped presentation. Every registration is an effect, so
- * disabling the bundle unwinds the skin without touching the host packages.
+ * Mount the skin: one owned stylesheet and one token-override layer. Every
+ * registration is an effect, so disabling the bundle unwinds the skin without
+ * touching the host packages.
  * @param ctx - client root context.
  */
 export function apply(ctx: Context): void {
@@ -60,15 +59,4 @@ export function apply(ctx: Context): void {
   // empty until a sprite is imported (`scripts/import-sprite.mjs`) or an entry
   // is added by hand; either way the shipped set renders unchanged elsewhere.
   ctx.effect(() => installIconOverrides(ICON_OVERRIDES), 'skin: icon artwork')
-
-  // `slots.inject` waits for the declaration instead of throwing on an unknown
-  // key, so a host without this seat simply never renders the skin's hero stack
-  // and keeps its own headline. Nothing to probe here.
-  ctx.effect(
-    () => ctx.slots.inject('conversation.hero.content', () => ctx.slots.register({
-      name: 'conversation.hero.content',
-      locale: NS,
-    }, HeroContent)),
-    'skin: hero stack',
-  )
 }

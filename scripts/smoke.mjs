@@ -79,8 +79,10 @@ await page.waitForTimeout(800)
 const fatal = errors.filter(e => /sessionController|workspaceRegistry|RemoteError|unavailable/.test(e))
 check('会话服务可用', fatal.length === 0, fatal.length === 0 ? '' : fatal[0].slice(0, 140))
 
-// 2. Skin applied: the tile, the tray and the card all exist and are placed by
-// the skin's rules rather than the shipped centring.
+// 2. Skin applied: the hero headline, the tray and the card all exist and are
+// placed by the skin's rules rather than the shipped centring. The headline
+// belongs to the host (the skin only re-anchors the phase), so only its
+// presence is asserted — the two anchors below are the skin's own work.
 const geom = await page.evaluate(() => {
   const r = s => {
     const el = document.querySelector(s)
@@ -88,24 +90,16 @@ const geom = await page.evaluate(() => {
     const b = el.getBoundingClientRect()
     return { x: +b.x.toFixed(1), y: +b.y.toFixed(1), w: +b.width.toFixed(1), h: +b.height.toFixed(1) }
   }
-  return { tile: r('.skin-hero__tile'), tray: r('[class*="_heroWorkspaceRow"]'), card: r('[data-composer-card]') }
+  return { headline: r('[class*="_headline"]'), tray: r('[class*="_heroWorkspaceRow"]'), card: r('[data-composer-card]') }
 })
-check('hero 磁贴就位', geom.tile !== null && Math.abs(geom.tile.y - 213.75) < 2, JSON.stringify(geom.tile))
+check('首屏标题在位', geom.headline !== null && geom.headline.h > 0, JSON.stringify(geom.headline))
 check('工作区托盘就位', geom.tray !== null && Math.abs(geom.tray.y - 594) < 2, JSON.stringify(geom.tray))
 check('输入卡贴底', geom.card !== null && Math.abs(geom.card.y - 632) < 2, JSON.stringify(geom.card))
 
-// 3. Suggestion chip stages a draft through the resident input actions. This is
-// the one skin-owned control that reaches into a shipped service.
-const chip = page.locator('.skin-hero__chip').first()
-await chip.click()
-await page.waitForTimeout(300)
-const afterChip = await page.evaluate(() => {
-  const input = document.querySelector('[class*="_input"][contenteditable]')
-  return input === null ? null : (input.textContent ?? '')
-})
-check('建议 chip 写入草稿', typeof afterChip === 'string' && afterChip.length > 0, JSON.stringify(afterChip?.slice(0, 24)))
-
-await page.screenshot({ path: join(outDir, 'smoke-chip.png') })
+// 3. The skin no longer injects a hero occupant, so the shipped headline must
+// be the one on screen: a leftover `.skin-hero` would mean a stale bundle.
+const staleHero = await page.evaluate(() => document.querySelectorAll('.skin-hero').length)
+check('无残留 hero 注入', staleHero === 0, `节点 ${staleHero}`)
 
 // 4. The composer itself must still take typing (Lexical, IME-safe surface).
 const editor = page.locator('[class*="_input"][contenteditable]').first()

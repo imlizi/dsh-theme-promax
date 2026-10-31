@@ -154,10 +154,6 @@ lines.push('| 项 | 实测 | 参考 | 差 |')
 lines.push('|---|---|---|---|')
 const geo = [
   ['侧栏宽', r.sidebar?.width, EXPECTED.sidebarWidth],
-  ['hero 磁贴宽', r.tile?.width, EXPECTED.tileWidth],
-  ['标题框顶 y', r.title?.y, EXPECTED.titleBoxTop],
-  ['chips 顶边 y', r.chips?.y, EXPECTED.chipsTop],
-  ['chips 高', r.chips?.height, EXPECTED.chipsHeight],
   ['托盘顶边 y', r.tray?.y, EXPECTED.trayTop],
   ['托盘宽', r.tray?.width, EXPECTED.trayWidth],
   ['输入卡顶边 y', r.card?.y, EXPECTED.cardTop],

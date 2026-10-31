@@ -122,8 +122,10 @@ function runAgainst(overrides = {}, dom = {}) {
 // not mount turns into a fatal boot entry, whether or not the skin ever uses it.
 check('inject 不含 layout（硬依赖会让缺该服务的宿主整窗启动失败）',
   !skin.inject.includes('layout'), skin.inject.join(', '))
+check('inject 不含 slots（皮肤不再占用任何座位）',
+  !skin.inject.includes('slots'), skin.inject.join(', '))
 check('inject 仍声明皮肤真正用到的服务',
-  ['slots', 'theme', 'locale'].every(name => skin.inject.includes(name)), skin.inject.join(', '))
+  ['theme', 'locale'].every(name => skin.inject.includes(name)), skin.inject.join(', '))
 
 /* ---- every host shape, silent and throw-free -------------------------- */
 
@@ -164,8 +166,8 @@ const stock = runAgainst()
 check('重命名提示写入皮肤变量',
   stock.styleWrites.some(([name, value]) => name === '--skin-rename-hint' && /^".*"$/.test(value)),
   JSON.stringify(stock.styleWrites))
-check('英雄区座位已申请',
-  stock.slots.includes('conversation.hero.content'), stock.slots.join(', ') || '(无)')
+check('不再申请已消失的 hero 内容座位',
+  !stock.slots.includes('conversation.hero.content'), stock.slots.join(', ') || '(无)')
 
 const failed = results.filter(r => !r.ok)
 console.log(`\n${results.length - failed.length}/${results.length} 通过`)

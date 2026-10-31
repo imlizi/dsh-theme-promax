@@ -107,10 +107,7 @@ const rects = await page.evaluate(() => {
     seat: pick('[data-composer-seat]'),
     stack: pick('[class*="_composerStack"]'),
     tray: pick('[class*="_heroWorkspaceRow"]'),
-    hero: pick('.skin-hero'),
-    tile: pick('.skin-hero__tile'),
-    title: pick('.skin-hero__title'),
-    chips: pick('.skin-hero__chips'),
+    headline: pick('[class*="_headline"]'),
     card: pick('[data-composer-card]'),
   }
 })
