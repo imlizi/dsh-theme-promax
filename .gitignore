@@ -1,6 +1,7 @@
 .DS_Store
 node_modules/
-
+.workbuddy-ai/
+.workbuddy/
 # editor temp copies (e.g. base.css4q2uUv)
 *.css[0-9a-zA-Z][0-9a-zA-Z][0-9a-zA-Z][0-9a-zA-Z][0-9a-zA-Z][0-9a-zA-Z][0-9a-zA-Z][0-9a-zA-Z]
 
