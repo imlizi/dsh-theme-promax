@@ -7,6 +7,7 @@ export const zh = {
   'hero.prompt.intro': '介绍这个项目',
   'hero.prompt.fix': '查找需要修复的问题',
   'hero.prompt.summary': '总结最近的改动',
+  'rename.hint': '保持简短且易于识别',
 }
 
 export const en = {
@@ -17,6 +18,7 @@ export const en = {
   'hero.prompt.intro': 'Introduce this project',
   'hero.prompt.fix': 'Find issues to fix',
   'hero.prompt.summary': 'Summarize recent changes',
+  'rename.hint': 'Keep it short and easy to recognize',
 }
 
 export const NS = 'theme.promax'
