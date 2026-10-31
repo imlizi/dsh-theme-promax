@@ -185,7 +185,7 @@
   /* The card covers the tray's lower edge, so the label centres in the visible
      38px band rather than the full 56px pill. */
   padding: 0 14px var(--skin-composer-overlap);
-  border-radius: 16px;
+  border-radius: 50px;
   background: #F3F3F3;
 }
 
@@ -236,6 +236,80 @@
 [class*='_sidebarCol'] {
   --dsw-radius-sm: 16px;
   --dsw-radius-md: 16px;
+}
+
+/* ---- sidebar control height -------------------------------------------- */
+
+/* One row rhythm for the whole column. The shipped column stacks five unrelated
+   heights — 28px icon buttons, 38px New Session, 36px panel entries and section
+   headers, 34px workspace rows, 32px session rows and footer triggers — which
+   reads as five rhythms stacked on top of each other. The skin flattens them to
+   one value, and recomputes vertical padding per control so the 22px line box
+   stays centred in the shorter box instead of being clipped by it.
+
+   Like the radius override, this is expressed as a custom property on the
+   column plus inherited reach into ui-workspace's rows, not as a list of hashed
+   class names. */
+[class*='_sidebarCol'] {
+  --skin-row-height: 30px;
+}
+
+/* Square controls keep their aspect: a 30px height on a 28px width would read
+   as a squashed pill rather than a button. The section header's search control
+   is its own class, not a sibling of the icon buttons. */
+[class*='_sidebarCol'] button[class*='_iconButton'],
+[class*='_sidebarCol'] button[class*='_searchButton'] {
+  width: var(--skin-row-height);
+  height: var(--skin-row-height);
+}
+
+/* The header action cluster is capped at 60px — exactly two shipped 28px
+   controls plus their 4px gap — and clips its overflow, so growing the
+   controls without growing the cap would cut the second one. The hidden state
+   is a two-class rule upstream and still wins. */
+[class*='_sidebarCol'] [class*='_headerActions'] {
+  max-width: calc(2 * var(--skin-row-height) + 4px);
+}
+
+/* New Session ships 38px: a 22px line box inside 8px padding. 4px keeps the
+   same centring at 30. */
+[class*='_sidebarCol'] button[class*='_newSession'] {
+  height: var(--skin-row-height);
+  padding-block: 4px;
+}
+
+[class*='_sidebarCol'] button[class*='_panelRow'] {
+  height: var(--skin-row-height);
+  min-height: var(--skin-row-height);
+  padding-block: 4px;
+}
+
+/* The workspace and session section headers are title rows, not controls: they
+   carry the trailing actions at 28px and only need the same band. */
+[class*='_sidebarCol'] [class*='_sectionHeader'] {
+  height: var(--skin-row-height);
+}
+
+[class*='_sidebarCol'] [class*='_projectRow'],
+[class*='_sidebarCol'] [class*='_sessionRow'] {
+  height: var(--skin-row-height);
+}
+
+/* Footer: Settings and the signed-out account menu both sit in a trigger row
+   whose height follows the trigger, so row and button are set together — a
+   30px button inside a 32px row would leave a 1px band above and below.
+
+   The account trigger ships `height: 44px` with a signed-out override at 32px
+   written as a three-compound selector, so the button needs the footer in its
+   own chain to win, and the rail variant (36px square) is left alone. Padding
+   drops to 3px so a signed-in 24px avatar still fits inside 30. */
+[class*='_sidebarCol'] [class*='_triggerRow'],
+[class*='_sidebarCol'] [class*='_footArea'] button[class*='_trigger']:not([data-collapsed='true']) {
+  height: var(--skin-row-height);
+}
+
+[class*='_sidebarCol'] [class*='_footArea'] button[class*='_trigger']:not([data-collapsed='true']) {
+  padding-block: 3px;
 }
 
 /* ---- sidebar column ---------------------------------------------------- */

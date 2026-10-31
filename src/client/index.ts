@@ -5,6 +5,7 @@ import type {} from '@deepseek-ai/dsh-client-locale/client'
 import css from './styles/base.css'
 import { SKIN_TOKENS } from './theme.ts'
 import { NS, en, zh } from './locales.ts'
+import { ICON_OVERRIDES, installIconOverrides } from './icons.ts'
 import { HeroContent } from './hero/HeroContent.tsx'
 
 /** Services this browser half needs before it can contribute UI. */
@@ -68,6 +69,13 @@ export function apply(ctx: Context): void {
   )
 
   ctx.effect(() => ctx.locale.register(NS, { zh, en }), 'skin: dictionaries')
+
+  // Icon artwork is one `<symbol>` per glyph in ui-theme's document sprite, so
+  // the skin swaps symbols instead of forking icon components. The table is
+  // empty until a sprite is imported (`scripts/import-sprite.mjs`) or an entry
+  // is added by hand; either way the shipped set renders unchanged elsewhere.
+  ctx.effect(() => installIconOverrides(ICON_OVERRIDES), 'skin: icon artwork')
+
 
   // The reference sidebar is 240.5px, narrower than the shipped track. Only a
   // ui-layout that exposes `setSidebarWidth` can be told so; on any other host

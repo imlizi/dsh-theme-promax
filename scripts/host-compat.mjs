@@ -41,13 +41,21 @@ const check = (name, ok, detail = '') => {
   console.log(`${ok ? 'PASS' : 'FAIL'}  ${name}${detail === '' ? '' : `  — ${detail}`}`)
 }
 
-/** Minimal DOM: `apply` owns exactly one style element. */
-function installDom() {
+/** Minimal DOM: `apply` owns one style element and patches the icon sprite. */
+function installDom({ querySelector = true } = {}) {
   const head = { children: [], appendChild(node) { this.children.push(node) } }
   globalThis.document = {
     head,
+    body: {},
     createElement: () => ({ dataset: {}, textContent: '', remove() {} }),
     documentElement: { dataset: {} },
+    // No sprite in this DOM: the icon installer must fall back to watching.
+    ...(querySelector ? { querySelector: () => null } : {}),
+  }
+  // Watching for a sprite that never arrives must not throw either.
+  globalThis.MutationObserver = class {
+    observe() {}
+    disconnect() {}
   }
   return head
 }
@@ -55,10 +63,11 @@ function installDom() {
 /**
  * Run `apply` against one host shape.
  * @param layout - the `ctx.layout` value this host exposes.
+ * @param dom - DOM capabilities this host has; defaults to a full minimal DOM.
  * @returns everything the run observed.
  */
-function runAgainst(layout) {
-  const head = installDom()
+function runAgainst(layout, dom = {}) {
+  const head = installDom(dom)
   const warnings = []
   const realWarn = console.warn
   console.warn = (...args) => { warnings.push(args.join(' ')) }
@@ -101,6 +110,15 @@ check('旧版宿主：给出降级告警', legacy.warnings.some(w => w.includes(
 const absent = runAgainst(undefined)
 check('无 layout 服务：apply 不抛错', absent.error === null, absent.error?.message ?? '')
 check('无 layout 服务：给出降级告警', absent.warnings.some(w => w.includes('setSidebarWidth')))
+
+// The icon sprite is mounted by ui-theme on its own schedule: an `apply` that
+// runs before it must wait quietly rather than warn or throw.
+check('图标精灵缺席：不抛错、不告警', absent.error === null && absent.warnings.length === 1,
+  absent.warnings.map(w => w.slice(0, 60)).join(' | '))
+
+// A DOM that cannot be queried at all (partial shims, non-browser runs).
+const noQuery = runAgainst({ setSidebarWidth: () => {} }, { querySelector: false })
+check('DOM 无 querySelector：apply 不抛错', noQuery.error === null, noQuery.error?.message ?? '')
 
 const failed = results.filter(r => !r.ok)
 console.log(`\n${results.length - failed.length}/${results.length} 通过`)

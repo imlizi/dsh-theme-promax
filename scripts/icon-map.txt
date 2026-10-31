@@ -1,0 +1,119 @@
+# 精灵图 → 应用图标 的对应表
+#
+#   node scripts/import-sprite.mjs --in ~/Downloads/icons.svg --map scripts/icon-map.txt
+#
+# 一行一个：<应用图标名>=<精灵里的 symbol id>
+# 应用图标名就是 `dsw-icon-<名字>-<weight>` 中间那段，`--dry-run` 会列出还缺哪些。
+# 一个精灵 symbol 可以服务多个应用图标（例如 x 同时是 close-outline 和 close-fill）。
+# 没列出来的图标继续用出厂图形，所以这张表可以慢慢补。
+
+# ---- 导航 / 通用 ----
+new-chat-outline=new-chat
+search-outline=search
+globe-outline=globe
+settings-outline=settings
+panel-left-outline=panel-left
+ellipsis-outline=ellipsis
+plus-outline=plus
+check-outline=check
+branch-outline=git-branch
+chevron-down-outline=chevron-down
+chevron-up-outline=chevron-up
+chevron-left-outline=chevron-left
+chevron-right-outline=chevron-right
+close-outline=x
+close-fill=x
+close-circle-fill=x-circle-filled
+
+# ---- 会话 / 编辑 ----
+copy-outline=copy
+refresh-outline=refresh-cw
+edit-outline=pencil
+think-outline=brain
+agent-preset-outline=agent
+browse-outline=browser-use
+link-outline=link
+right-up-outline=arrow-up-right
+deliver-doc=file-document
+
+# ---- 状态 ----
+trash-outline=trash-2
+warning-outline=alert-triangle
+warning-triangle-outline=alert-triangle
+check-circle-fill=circle-check
+check-circle-outline=circle-check
+stop-fill=stop
+loading-outline=loader-2
+info-outline=info
+
+# ---- 输入区 ----
+paperclip-outline=paperclip
+download-outline=download
+fullscreen-outline=maximize
+code-outline=code
+microphone-outline=mic
+
+# ---- 侧栏 ----
+cordis-plugin-outline=plugin
+plugin-pinwheel-outline=plugin
+project-add-outline=folder-plus
+folder-open-outline=folder-open
+folder-open=folder-open
+folder-close=folder
+flat-list-outline=list
+queue-outline=list
+workspace-tree-outline=workspace-list
+chevrons-up-down-outline=arrow-down-up
+apps-add-outline=square-plus
+apps-add-compact-outline=square-plus
+
+# ---- 时间 / 主题 / 面板 ----
+clock-outline=clock
+alarm-clock-outline=clock
+light-outline=sun
+dark-outline=moon
+followsystem-outline=laptop
+inspect-outline=eye
+archive-outline=archive
+archive-check-outline=archive
+wrap-lines-outline=wrap-text
+wrap-fill=wrap-text
+compare-split-outline=columns
+shield-outline=shield
+pin-outline=pin
+pin-fill=pin
+
+# ---- 待确认（先注释掉，继续用出厂图形）----
+# 精灵里没有明确对应，或语义有歧义，确认后再打开
+# send-outline=
+# paper-plane-outline=
+# triangle-right-fill=
+# save-outline=
+# user-outline=
+# users-outline=
+# share-outline=
+# like-outline=
+# dislike-outline=
+# data-outline=
+# database-outline=
+# gauge-outline=
+# question-outline=
+# play-outline=
+# pause-outline=
+# skill-outline=
+# goal-outline=
+# plan-outline=
+# compact-outline=
+# sliders-two-outline=
+# drag-handle-outline=
+# tree-corner=
+# context-injection-outline=
+# api-outline=
+# personalization-outline=
+# sparkle=
+# enhance-outline=
+# nowrap-fill=
+# unarchive-outline=
+# archive-off-outline=
+# list-pen-outline=
+# checklist-outline=
