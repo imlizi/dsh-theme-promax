@@ -24,8 +24,15 @@ export const SKIN_TOKENS = {
   '--dsw-alias-border-l3': { light: '#E3E3E3', dark: '#3A3A3A' },
   '--dsw-alias-border-l4': { light: '#D8D8D8', dark: '#444444' },
   // Geometry
-  '--dsw-radius-sm': { light: '8px', dark: '8px' },
-  '--dsw-radius-md': { light: '12px', dark: '12px' },
+  // One corner for the whole app. The shipped scale steps 8px → 12px → 16px,
+  // which reads as three families of control (icon buttons vs. rows vs. cards);
+  // the skin flattens the two small steps onto the large one, so a button, a
+  // panel entry, a menu row and a dialog card all carry the same 16px corner.
+  // Declared at the token layer rather than on the sidebar column so it also
+  // reaches the composer, the menus that portal to <body> and the right-hand
+  // panel, not just the column's own rows.
+  '--dsw-radius-sm': { light: '16px', dark: '16px' },
+  '--dsw-radius-md': { light: '16px', dark: '16px' },
   '--dsw-radius-lg': { light: '16px', dark: '16px' },
   '--dsw-radius-xl': { light: '24px', dark: '24px' },
   '--dsw-radius-panel': { light: '28px', dark: '28px' },

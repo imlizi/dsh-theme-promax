@@ -168,6 +168,24 @@ if (await workspaceRow.count() > 0) {
   }
 }
 
+// --- workspace delete confirmation ---
+// Same card, no field: opening it is harmless, and Escape settles the request
+// without deleting anything, so the run never mutates the profile's workspace
+// list.
+const deleteRow = page.locator('[class*="_projectRow"]').first()
+if (await deleteRow.count() > 0) {
+  await openMenu(deleteRow)
+  const remove = page.locator('[role="menuitem"]', { hasText: '删除工作区' }).first()
+  if (await remove.count() > 0) {
+    await remove.click()
+    await page.waitForTimeout(600)
+    await page.screenshot({ path: join(outDir, `dialog-delete${suffix}.png`) })
+    report.deleteDialog = await measureDialog()
+    await page.keyboard.press('Escape')
+    await page.waitForTimeout(300)
+  }
+}
+
 console.log(JSON.stringify(report, null, 1))
 if (errors.length > 0) console.log('errors:', errors.slice(0, 4))
 await browser.close()

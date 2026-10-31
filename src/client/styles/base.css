@@ -218,25 +218,6 @@
   opacity: 1;
 }
 
-/* ---- sidebar control radius -------------------------------------------- */
-
-/* The shipped column rounds its controls with two shared tokens: 8px on the
-   icon buttons (collapse, search, view options, add workspace) and 12px on the
-   New Session bar, the panel entries and every session/workspace row. The skin
-   flattens both to one radius so a button, a panel entry and a session title
-   all carry the same corner — the value below is the single knob for it.
-
-   The override is a custom property declared on the column itself rather than
-   a list of class suffixes, because the rows are not the sidebar's own markup:
-   ui-workspace renders the workspace and session lists into this column. An
-   inherited token reaches them without naming a single hashed class, and it
-   stops at the column boundary, so the composer, the menus that portal to
-   <body> and the right-hand panel keep their shipped rounding. */
-[class*='_sidebarCol'] {
-  --dsw-radius-sm: 16px;
-  --dsw-radius-md: 16px;
-}
-
 /* ---- sidebar control height -------------------------------------------- */
 
 /* One row rhythm for the whole column. The shipped column stacks five unrelated
@@ -246,9 +227,9 @@
    one value, and recomputes vertical padding per control so the 22px line box
    stays centred in the shorter box instead of being clipped by it.
 
-   Like the radius override, this is expressed as a custom property on the
-   column plus inherited reach into ui-workspace's rows, not as a list of hashed
-   class names. */
+   The knob is a custom property on the column rather than a list of hashed
+   class names: ui-workspace renders the workspace and session lists into this
+   column, so an inherited token reaches them without naming a class. */
 [class*='_sidebarCol'] {
   --skin-row-height: 30px;
 }
@@ -264,10 +245,48 @@
 
 /* The header action cluster is capped at 60px — exactly two shipped 28px
    controls plus their 4px gap — and clips its overflow, so growing the
-   controls without growing the cap would cut the second one. The hidden state
-   is a two-class rule upstream and still wins. */
-[class*='_sidebarCol'] [class*='_headerActions'] {
+   controls without growing the cap would cut the second one.
+
+   The `:not()` is load-bearing: `headerActionsHidden` is a single class
+   upstream, so a bare `[class*='_headerActions']` outranks it and the collapsed
+   cluster keeps its 64px reservation while the search field is open. That
+   reservation is what held the expanded field at 192px inside a 256px header —
+   the field itself is already `width: 100%`, it simply had nowhere to grow. */
+[class*='_sidebarCol'] [class*='_headerActions']:not([class*='_headerActionsHidden']) {
   max-width: calc(2 * var(--skin-row-height) + 4px);
+}
+
+/* ---- sidebar search field ---------------------------------------------- */
+
+/* The expanded field ships 32px tall, but the band it lives in is the section
+   header, which the skin has already shortened to 30px — and that header clips
+   its own overflow. The 2px of overhang split evenly puts both hairlines
+   outside the clip, so the field reads as two loose corner arcs with no top or
+   bottom edge. Matching the band's height lands both borders on the clip edge.
+
+   The magnifier ships 32px tall in this state. Inside a 30px border-box field
+   the content box is 28, so it takes that rather than overflowing into the
+   clip, which would shave its hover fill. */
+[class*='_sidebarCol'] [class*='_searchExpanded'] {
+  height: var(--skin-row-height);
+}
+
+[class*='_sidebarCol'] [class*='_searchExpanded'] [class*='_searchButton'] {
+  width: calc(var(--skin-row-height) - 2px);
+  height: calc(var(--skin-row-height) - 2px);
+}
+
+/* The expanded header insets its content by the sidebar's paint inset plus a
+   pixel, which left the field 4px short of the session rows on each side. It
+   takes the row width instead. The header and the field round with the same
+   `--dsw-radius-md` token, so the field's border rides the header's clip arc
+   exactly — full width shaves nothing.
+
+   The chain mirrors the shipped selector (`.root:not(.rail) .sectionHeader:
+   has(.searchExpanded)`), one compound longer, because that rule is four
+   classes deep and a shorter one would lose to it. */
+[class*='_sidebarCol'] [class*='_root']:not([class*='_rail']) [class*='_sectionHeader']:has([class*='_searchExpanded']) {
+  padding-inline: 0;
 }
 
 /* New Session ships 38px: a 22px line box inside 8px padding. 4px keeps the
@@ -330,45 +349,47 @@ html[data-platform] [class*='_centerCol'] {
   border-left-color: #EDEDED;
 }
 
-/* ---- rename dialogs ---------------------------------------------------- */
+/* ---- dialog cards: rename + delete ------------------------------------- */
 
-/* Both rename dialogs — workspace and session — are the same `Modal` around the
-   same field, and the reference draws them as one card: 420x185, 22px corners,
-   20px of air on every side, a 20px title over a 14px hint, a 36px field and
-   two 62x32 buttons 12px apart.
+/* The rename pair (workspace, session) and the workspace delete confirmation
+   are one `Modal` card in the reference: 420px wide, 16px corners, 20px of air
+   on every side, a 20px title over a 14px grey line, and two 62x32 buttons 12px
+   apart. Rename puts a 36px field under that line; delete puts its sentence.
 
-   `:has()` is the only hook that separates them from every other modal: the
-   dialog element carries no distinguishing class, but its body holds the one
-   input whose class suffix is `_renameInput`. The check is scoped to the dialog
-   because the sidebar's inline row editor reuses that same class. */
+   `:has()` is the only hook that separates these from every other modal: the
+   dialog element carries no distinguishing class, but the rename body holds the
+   one input whose suffix is `_renameInput` and the delete footer holds the one
+   button whose suffix is `_deleteAction`. Both checks are scoped to the dialog
+   because the sidebar's inline row editor reuses the input class. */
 
 /* The card itself. Shipped: 380px, 28px corners, 24px bottom padding only, a
    20px gap between the body and the footer. */
-[role='dialog'][aria-modal='true']:has(input[class*='_renameInput']) {
+[role='dialog'][aria-modal='true']:is(:has(input[class*='_renameInput']), :has(button[class*='_deleteAction']), [class*='_installDialog'], :has([class*='_sourceForm'])) {
   box-sizing: border-box;
   width: min(420px, 100%);
   gap: 12px;
   padding: 20px;
-  border-radius: 22px;
+  border-radius: 16px;
   background: #FDFDFD;
   /* The reference separates the card from the blurred page with a soft drop
      rather than the shipped hairline ring. */
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
-[role='dialog'][aria-modal='true']:has(input[class*='_renameInput']) [class*='_content'] {
+[role='dialog'][aria-modal='true']:is(:has(input[class*='_renameInput']), :has(button[class*='_deleteAction']), [class*='_installDialog'], :has([class*='_sourceForm'])) [class*='_content'] {
   padding: 0;
 }
 
-/* The header is a block of two lines (title, hint), with the close button riding
-   at the top right rather than centred on the title. */
-[role='dialog'][aria-modal='true']:has(input[class*='_renameInput']) [class*='_header'] {
+/* The header is a block of two lines (title, then the hint or the delete
+   sentence), with the close button riding at the top right rather than centred
+   on the title. */
+[role='dialog'][aria-modal='true']:is(:has(input[class*='_renameInput']), :has(button[class*='_deleteAction']), [class*='_installDialog'], :has([class*='_sourceForm'])) [class*='_header'] {
   align-items: flex-start;
   gap: 0;
   padding: 0;
 }
 
-[role='dialog'][aria-modal='true']:has(input[class*='_renameInput']) [class*='_title'] {
+[role='dialog'][aria-modal='true']:is(:has(input[class*='_renameInput']), :has(button[class*='_deleteAction']), [class*='_installDialog'], :has([class*='_sourceForm'])) [class*='_title'] {
   font-size: 20px;
   line-height: 28px;
   font-weight: 600;
@@ -377,7 +398,7 @@ html[data-platform] [class*='_centerCol'] {
 
 /* 24px hit area whose centre lands 16px from the card's top and right edges;
    the shipped button is 28px and sits inside the header's 22/14 padding. */
-[role='dialog'][aria-modal='true']:has(input[class*='_renameInput']) [class*='_close'] {
+[role='dialog'][aria-modal='true']:is(:has(input[class*='_renameInput']), :has(button[class*='_deleteAction']), [class*='_installDialog'], :has([class*='_sourceForm'])) [class*='_close'] {
   flex: none;
   width: 24px;
   height: 24px;
@@ -389,13 +410,14 @@ html[data-platform] [class*='_centerCol'] {
   color: #4D4C4C;
 }
 
-[role='dialog'][aria-modal='true']:has(input[class*='_renameInput']) [class*='_close'] svg {
+[role='dialog'][aria-modal='true']:is(:has(input[class*='_renameInput']), :has(button[class*='_deleteAction']), [class*='_installDialog'], :has([class*='_sourceForm'])) [class*='_close'] svg {
   width: 15px;
   height: 15px;
 }
 
-/* The body holds the hint line above the field. Its 4px top margin is the gap
-   under the title's 28px line box. */
+/* The rename body holds the hint line above the field. Its 4px top margin is
+   the gap under the title's 28px line box. The delete body is empty until the
+   dialog reports progress, so it keeps no margin of its own. */
 [role='dialog'][aria-modal='true']:has(input[class*='_renameInput']) [class*='_body'] {
   margin-top: 4px;
   padding: 0;
@@ -436,17 +458,17 @@ html[data-platform] [class*='_centerCol'] {
 }
 
 /* Footer: two compact buttons, 12px apart, flush with the card's 20px padding. */
-[role='dialog'][aria-modal='true']:has(input[class*='_renameInput']) [class*='_footer'] {
+[role='dialog'][aria-modal='true']:is(:has(input[class*='_renameInput']), :has(button[class*='_deleteAction']), [class*='_installDialog'], :has([class*='_sourceForm'])) [class*='_footer'] {
   gap: 12px;
   padding: 0;
 }
 
-[role='dialog'][aria-modal='true']:has(input[class*='_renameInput']) [class*='_footer'] button {
+[role='dialog'][aria-modal='true']:is(:has(input[class*='_renameInput']), :has(button[class*='_deleteAction']), [class*='_installDialog'], :has([class*='_sourceForm'])) [class*='_footer'] button {
   box-sizing: border-box;
   min-width: 62px;
   height: 32px;
   padding: 0 16px;
-  border-radius: 10px;
+  border-radius: 16px;
   font-size: 14px;
   line-height: 20px;
   font-weight: 500;
@@ -456,7 +478,7 @@ html[data-platform] [class*='_centerCol'] {
    #FCFBFB inside it, i.e. no fill at all. The shipped variant draws its stroke
    as an inset box-shadow at the hairline width, which would keep a 0.5px edge
    inside this 1px border. */
-[role='dialog'][aria-modal='true']:has(input[class*='_renameInput'])
+[role='dialog'][aria-modal='true']:is(:has(input[class*='_renameInput']), :has(button[class*='_deleteAction']), [class*='_installDialog'], :has([class*='_sourceForm']))
   [class*='_footer'] button[class*='_outline'] {
   border: 1px solid #F0F0F0;
   background: transparent;
@@ -464,7 +486,7 @@ html[data-platform] [class*='_centerCol'] {
   color: #0D0D0D;
 }
 
-[role='dialog'][aria-modal='true']:has(input[class*='_renameInput'])
+[role='dialog'][aria-modal='true']:is(:has(input[class*='_renameInput']), :has(button[class*='_deleteAction']), [class*='_installDialog'], :has([class*='_sourceForm']))
   [class*='_footer'] button[class*='_primary'] {
   border: 1px solid transparent;
   background: #0D0D0D;
@@ -474,13 +496,13 @@ html[data-platform] [class*='_centerCol'] {
 /* The hover fills are restated because the rules above outrank the shipped
    `:hover` variants on the same classes. */
 @media (hover: hover) {
-  [role='dialog'][aria-modal='true']:has(input[class*='_renameInput'])
+  [role='dialog'][aria-modal='true']:is(:has(input[class*='_renameInput']), :has(button[class*='_deleteAction']), [class*='_installDialog'], :has([class*='_sourceForm']))
     [class*='_footer'] button[class*='_outline']:hover:not(:disabled) {
     background: #F7F7F7;
     border-color: #E6E6E6;
   }
 
-  [role='dialog'][aria-modal='true']:has(input[class*='_renameInput'])
+  [role='dialog'][aria-modal='true']:is(:has(input[class*='_renameInput']), :has(button[class*='_deleteAction']), [class*='_installDialog'], :has([class*='_sourceForm']))
     [class*='_footer'] button[class*='_primary']:hover:not(:disabled) {
     background: #262626;
   }
@@ -488,17 +510,17 @@ html[data-platform] [class*='_centerCol'] {
 
 /* Dark scheme: the same geometry, surfaces swapped for the dark layer tokens the
    skin already publishes. */
-body[data-ds-dark-theme] [role='dialog'][aria-modal='true']:has(input[class*='_renameInput']) {
+body[data-ds-dark-theme] [role='dialog'][aria-modal='true']:is(:has(input[class*='_renameInput']), :has(button[class*='_deleteAction']), [class*='_installDialog'], :has([class*='_sourceForm'])) {
   background: #232323;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5), 0 1px 3px rgba(0, 0, 0, 0.4);
 }
 
-body[data-ds-dark-theme] [role='dialog'][aria-modal='true']:has(input[class*='_renameInput'])
+body[data-ds-dark-theme] [role='dialog'][aria-modal='true']:is(:has(input[class*='_renameInput']), :has(button[class*='_deleteAction']), [class*='_installDialog'], :has([class*='_sourceForm']))
   [class*='_title'] {
   color: #F5F5F5;
 }
 
-body[data-ds-dark-theme] [role='dialog'][aria-modal='true']:has(input[class*='_renameInput'])
+body[data-ds-dark-theme] [role='dialog'][aria-modal='true']:is(:has(input[class*='_renameInput']), :has(button[class*='_deleteAction']), [class*='_installDialog'], :has([class*='_sourceForm']))
   [class*='_close'] {
   color: #A3A3A0;
 }
@@ -515,17 +537,348 @@ body[data-ds-dark-theme] [role='dialog'][aria-modal='true']:has(input[class*='_r
   color: #F5F5F5;
 }
 
-body[data-ds-dark-theme] [role='dialog'][aria-modal='true']:has(input[class*='_renameInput'])
+body[data-ds-dark-theme] [role='dialog'][aria-modal='true']:is(:has(input[class*='_renameInput']), :has(button[class*='_deleteAction']), [class*='_installDialog'], :has([class*='_sourceForm']))
   [class*='_footer'] button[class*='_outline'] {
   border-color: #3A3A3A;
   background: transparent;
   color: #F5F5F5;
 }
 
-body[data-ds-dark-theme] [role='dialog'][aria-modal='true']:has(input[class*='_renameInput'])
+body[data-ds-dark-theme] [role='dialog'][aria-modal='true']:is(:has(input[class*='_renameInput']), :has(button[class*='_deleteAction']), [class*='_installDialog'], :has([class*='_sourceForm']))
   [class*='_footer'] button[class*='_primary'] {
   background: #F5F5F5;
   color: #141414;
 }
 
+/* ---- delete confirmation ----------------------------------------------- */
 
+/* The delete card carries its sentence in the Modal's own description slot
+   instead of the rename card's `::before` hint, so it borrows the same 4px gap
+   under the title and the same grey — the shipped paragraph is 14/22 in the
+   primary label colour, i.e. as loud as the title. */
+[role='dialog'][aria-modal='true']:has(button[class*='_deleteAction']) [class*='_description'] {
+  margin: 4px 0 0;
+  padding: 0;
+  font-size: 14px;
+  line-height: 20px;
+  color: #979797;
+}
+
+/* The body only exists while the dialog reports progress or an error: it hangs
+   under the sentence with 8px of air instead of the shipped 20px. */
+[role='dialog'][aria-modal='true']:has(button[class*='_deleteAction']) [class*='_body'] {
+  margin-top: 0;
+  padding: 0;
+}
+
+[role='dialog'][aria-modal='true']:has(button[class*='_deleteAction']) [class*='_body']:has(> *) {
+  margin-top: 8px;
+}
+
+/* Both lines sit a step above the shipped 12px, matching the menu's captions. */
+[role='dialog'][aria-modal='true']:has(button[class*='_deleteAction']) [class*='_deleteStatus'] {
+  font-size: 13px;
+  line-height: 18px;
+  color: #979797;
+}
+
+[role='dialog'][aria-modal='true']:has(button[class*='_deleteAction']) [class*='_renameError'] {
+  margin-top: 0;
+  font-size: 13px;
+  line-height: 18px;
+}
+
+/* Destructive confirm: the primary button's geometry and fill, in the error
+   colour. The shipped variant is an outlined button with red text, which reads
+   as a second Cancel beside the real one. */
+[role='dialog'][aria-modal='true']:has(button[class*='_deleteAction'])
+  [class*='_footer'] button[class*='_deleteAction'] {
+  border: 1px solid transparent;
+  background: #EC1313;
+  box-shadow: none;
+  color: #FFFFFF;
+}
+
+@media (hover: hover) {
+  [role='dialog'][aria-modal='true']:has(button[class*='_deleteAction'])
+    [class*='_footer'] button[class*='_deleteAction']:hover:not(:disabled) {
+    background: #D41111;
+  }
+}
+
+/* Dark scheme: the error fill follows the primary button's convention and turns
+   into a light surface with dark text, so it stays legible on #232323. */
+body[data-ds-dark-theme] [role='dialog'][aria-modal='true']:has(button[class*='_deleteAction'])
+  [class*='_description'] {
+  color: #8A8A85;
+}
+
+body[data-ds-dark-theme] [role='dialog'][aria-modal='true']:has(button[class*='_deleteAction'])
+  [class*='_deleteStatus'] {
+  color: #8A8A85;
+}
+
+body[data-ds-dark-theme] [role='dialog'][aria-modal='true']:has(button[class*='_deleteAction'])
+  [class*='_footer'] button[class*='_deleteAction'] {
+  background: #F25A5A;
+  color: #1A1A1A;
+}
+
+/* ---- plugin dialogs: add plugin + index sources ------------------------- */
+
+/* Two more Modals join the card above: the plugin manager's add-plugin form
+   (its dialog carries `_installDialog`) and the market's index-source form (the
+   one whose body holds `_sourceForm`). The shared block already hands them the
+   16px card, the 20px title, the close button and the footer buttons; what is
+   left is the description line and the two bodies, which ship the Modal's own
+   24px gutters and its own full-width fields. */
+
+/* The shipped description is 14/22 in the primary label colour — as loud as the
+   title — and indents itself by the card's old 24px gutter. */
+[role='dialog'][aria-modal='true']:is([class*='_installDialog'], :has([class*='_sourceForm']))
+  [class*='_description'] {
+  margin: 4px 0 0;
+  padding: 0;
+  font-size: 14px;
+  line-height: 20px;
+  color: #979797;
+}
+
+/* The body hangs 12px under the description (or under the title when the card
+   carries none) instead of the shipped 20px, and drops its gutter. */
+[role='dialog'][aria-modal='true']:is([class*='_installDialog'], :has([class*='_sourceForm']))
+  [class*='_body'] {
+  margin-top: 12px;
+  padding: 0;
+}
+
+/* Both forms open with a full-width text field. The shipped add-plugin field is
+   a 40px grey box on a 12px corner and the index-source form uses the 32px
+   `Input` atom; both become the rename card's 36px white well. */
+[role='dialog'][aria-modal='true']:is([class*='_installDialog'], :has([class*='_sourceForm']))
+  [class*='_installField'] input {
+  box-sizing: border-box;
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid #E8E8E8;
+  border-radius: 8px;
+  background: #FFFFFF;
+  font-size: 14px;
+  line-height: 20px;
+  color: #0D0D0D;
+}
+
+/* The shipped focus state is a half-pixel inset ring; the reference keeps the
+   border alone. */
+[role='dialog'][aria-modal='true']:is([class*='_installDialog'], :has([class*='_sourceForm']))
+  [class*='_installField'] input:focus {
+  border-color: #0169CC;
+  box-shadow: none;
+  outline: none;
+}
+
+/* The rule above outranks the shipped `[aria-invalid='true']` pair, so a
+   refused spec would keep the neutral edge: both states are restated. */
+[role='dialog'][aria-modal='true']:is([class*='_installDialog'], :has([class*='_sourceForm']))
+  [class*='_installField'] input[aria-invalid='true'],
+[role='dialog'][aria-modal='true']:is([class*='_installDialog'], :has([class*='_sourceForm']))
+  [class*='_installField'] input[aria-invalid='true']:focus {
+  border-color: var(--dsw-alias-state-error-primary);
+}
+
+[role='dialog'][aria-modal='true']:has([class*='_sourceForm'])
+  [class*='_sourceForm'] [class*='_wrap'] {
+  box-sizing: border-box;
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid #E8E8E8;
+  border-radius: 8px;
+  background: #FFFFFF;
+}
+
+[role='dialog'][aria-modal='true']:has([class*='_sourceForm'])
+  [class*='_sourceForm'] [class*='_wrap']:focus-within {
+  border-color: #0169CC;
+}
+
+/* The row's submit stands beside the field, so it takes the field's 36px rather
+   than the atom's 28. */
+[role='dialog'][aria-modal='true']:has([class*='_sourceForm'])
+  [class*='_sourceForm'] button {
+  box-sizing: border-box;
+  height: 36px;
+  padding: 0 12px;
+  border-radius: 16px;
+  font-size: 13px;
+  line-height: 20px;
+  font-weight: 500;
+}
+
+/* The add-plugin footer is a column — the trust note, then the action. */
+[role='dialog'][aria-modal='true'][class*='_installDialog']
+  [class*='_installFooter'] {
+  gap: 12px;
+}
+
+/* The registry picker sits in the same row as the field, so it takes the card's
+   corner instead of the shipped 12px. Its 28px height already reads as a
+   secondary control beside the 36px field. */
+[role='dialog'][aria-modal='true']:is([class*='_installDialog'], :has([class*='_sourceForm']))
+  [class*='_registryToggle'] {
+  border-radius: 16px;
+}
+
+/* The amber trust note: 12/18 fine print on a 10px corner, tighter than the
+   shipped 10x12 padding so it reads as a footnote to the card. */
+[role='dialog'][aria-modal='true']:is([class*='_installDialog'], :has([class*='_sourceForm']))
+  :is([class*='_installSafety'], [class*='_notice']) {
+  padding: 8px 10px;
+  border-radius: 16px;
+  font-size: 12px;
+  line-height: 18px;
+  color: #5F5F5A;
+}
+
+/* The install *wizard* shares `_installDialog` but streams pnpm output, whose
+   lines are unwrapped, so it keeps the shipped 560px card. */
+[role='dialog'][aria-modal='true'][class*='_installDialog']:has([class*='_wizard']) {
+  width: min(560px, 100%);
+}
+
+body[data-ds-dark-theme] [role='dialog'][aria-modal='true']:is([class*='_installDialog'], :has([class*='_sourceForm']))
+  :is([class*='_description'], [class*='_installSafety'], [class*='_notice']) {
+  color: #8A8A85;
+}
+
+body[data-ds-dark-theme] [role='dialog'][aria-modal='true']:is([class*='_installDialog'], :has([class*='_sourceForm']))
+  [class*='_installField'] input {
+  border-color: #3A3A3A;
+  background: #1C1C1C;
+  color: #F5F5F5;
+}
+
+body[data-ds-dark-theme] [role='dialog'][aria-modal='true']:has([class*='_sourceForm'])
+  [class*='_sourceForm'] [class*='_wrap'] {
+  border-color: #3A3A3A;
+  background: #1C1C1C;
+}
+
+body[data-ds-dark-theme] [role='dialog'][aria-modal='true']:has([class*='_sourceForm'])
+  [class*='_sourceForm'] [class*='_input'] {
+  color: #F5F5F5;
+}
+
+/* ---- segmented tabs ---------------------------------------------------- */
+
+/* The skin maps `bg-layer-3` (the selected pill) and `bg-module-platform` (the
+   track) to the same grey, so a segmented control only showed its selection
+   through the pill's 0.5px hairline — `已安装` looked like plain text on the
+   track. The pill goes back to the design's light surface here instead of
+   moving either token: `bg-layer-3` is also the code-block surface and the tag
+   text colour, and `bg-module-platform` is the appearance/font-size preview. */
+[role='tablist'] > [class*='_indicator'] {
+  background: #FFFFFF;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+/* Dark scheme: the pill steps up from the #2A2A2A track instead of matching it,
+   with a lighter hairline so its edge survives the low contrast. */
+body[data-ds-dark-theme] [role='tablist'] > [class*='_indicator'] {
+  background: #3C3C3C;
+  border-color: #4A4A4A;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+/* ---- dropdown menus ---------------------------------------------------- */
+
+/* Every dropdown in the shell — the row context menus, the plugin header menu,
+   the pickers — is one `MenuSurface` with `role="menu"`, so the reference menu's
+   card can be expressed once and inherited by all of them.
+
+   Reference: a 160px card with 16px corners, a 4px inset, 28px rows, a 16px
+   icon, a 6px icon-to-label gap, and hairlines that start at the icon's left
+   edge. The shipped card is 144px with 34px rows and a 14px icon. */
+
+/* The card. The surface is a translucent material (`--dsw-menu-surface-fill` +
+   backdrop blur) painted by a child layer; the reference card is opaque, so the
+   fill token is swapped here instead of repainting that layer. */
+[role='menu'] {
+  box-sizing: border-box;
+  min-width: 160px;
+  padding: 4px;
+  border-radius: 16px;
+  /* The shipped elevation pairs a 0.5px #EFEFEF rim with two faint shadows,
+     which reads as a border; the reference uses a drop with no rim. */
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.05), 0 0 0 0.5px rgba(0, 0, 0, 0.05);
+  --dsw-menu-surface-fill: #FDFDFD;
+  /* The shipped hover is a cool 6% navy; the reference row fill is neutral. */
+  --dsw-alias-interactive-bg-hover: rgba(0, 0, 0, 0.04);
+}
+
+/* The macOS backing is an opaque copy of the card painted behind the page so
+   the window's vibrancy has something to blur; it has to keep the same corners
+   and fill, or it peeks out from behind the rounded card. */
+[data-menu-backing] {
+  border-radius: 16px;
+  background: #FDFDFD;
+}
+
+/* One action row. 20px line + 4px padding is the reference's 28px rhythm, a
+   step tighter than the shipped 34. */
+[role='menu'] [role='menuitem'] {
+  min-height: 28px;
+  padding: 4px 8px;
+  gap: 6px;
+  border-radius: 16px;
+  font-size: 13px;
+  line-height: 20px;
+}
+
+/* The glyph is 16px in the reference; the shipped sprite draws at 14. */
+[role='menu'] [class*='_itemIcon'],
+[role='menu'] [class*='_itemIcon'] svg,
+[role='menu'] [class*='_check'] {
+  width: 16px;
+  height: 16px;
+}
+
+/* Hairlines between groups stop at the icon's left edge, 12px in from the
+   card's edge (4px inset + 8px margin), and carry 4px of air either side. */
+[role='menu'] [role='separator'] {
+  height: 1px;
+  margin: 4px 8px;
+  background: #EDEDED;
+}
+
+/* Shortcut hints sit one step lighter and larger than the shipped 11px. */
+[role='menu'] [class*='_shortcutKeys'] {
+  font-size: 11.5px;
+  color: #A0A0A0;
+}
+
+/* Heading rows keep the item rhythm. */
+[role='menu'] [class*='_label']:not([class*='_itemLabel']) {
+  padding: 4px 8px;
+  font-size: 11px;
+  line-height: 16px;
+  color: #979797;
+}
+
+/* Dark scheme: the same geometry on the skin's dark card. */
+body[data-ds-dark-theme] [role='menu'] {
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.4), 0 0 0 0.5px rgba(255, 255, 255, 0.06);
+  --dsw-menu-surface-fill: #262626;
+  --dsw-alias-interactive-bg-hover: rgba(255, 255, 255, 0.07);
+}
+
+body[data-ds-dark-theme] [data-menu-backing] {
+  background: #262626;
+}
+
+body[data-ds-dark-theme] [role='menu'] [role='separator'] {
+  background: #3A3A3A;
+}
+
+body[data-ds-dark-theme] [role='menu'] [class*='_shortcutKeys'] {
+  color: #7A7A76;
+}
