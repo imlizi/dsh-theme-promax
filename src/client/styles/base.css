@@ -30,6 +30,61 @@
   --skin-composer-floor: 17.5px; /* card bottom → viewport bottom */
 }
 
+/* ---- window chrome is not a document ----------------------------------- */
+
+/* A row marked `data-window-drag` hands its box to the native window: inside
+   that box a press moves the window, and a double-click zooms it. Outside it
+   the press falls through to the page, where the platform's own double-click
+   runs instead and selects the word under the pointer. The mark is declared by
+   the shell per row, and the rows do not tile the whole top edge — the plugin
+   page's head is 925 of the column's 1021 at 1302 wide, so its outer 48px
+   gutters belong to no row. Aiming at the window's top-right corner therefore
+   lands on a page surface often enough to read as "sometimes", and the gesture
+   paints a highlight that no press asked for.
+
+   Chrome rows hold no text anyone copies, so they opt out of selection: a miss
+   then does nothing instead of selecting. The regions themselves are left to
+   the shell — a skin-declared drag box would not be watched by the shell's
+   recall pass that refreshes the window's rects, and a stale rect outlives the
+   surface that declared it. Editable fields opt back in, since a caret is the
+   whole point of pressing in one. */
+html[data-platform='darwin'] [data-window-drag] {
+  user-select: none;
+}
+
+html[data-platform='darwin'] [data-window-drag] :is(input, textarea, [contenteditable='true']) {
+  user-select: text;
+}
+
+/* The skin's own row for the window's top edge. The shell marks chrome rows one
+   at a time and they do not tile that edge — the plugin page's head is 925 of
+   the centre column's 1021, so its outer 48px gutters belong to no row — which
+   is why a double-click aimed at the edge can land on the page and select a
+   word instead of zooming.
+
+   The client half inserts this strip as the first child of the centre column,
+   marked `data-window-drag` so the shell's single darwin rule paints the region
+   and its recall pass keeps the window's rects current (a region the watcher
+   cannot see is one that outlives the surface declaring it). It never takes
+   input: what it contributes is native geometry, not hit testing, so every
+   control underneath keeps its clicks. 48px is ui-layout's darwin
+   `--dsh-frame-top-clearance`, the strip the traffic lights live in. */
+.skin-drag-band {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 48px;
+  pointer-events: none;
+  /* A box that paints nothing has no region to collect, and 8-bit alpha rounds
+     0.001 to zero: one alpha step is the faintest paint that still exists. */
+  background: rgba(0, 0, 0, 0.004);
+}
+
+/* The column is not positioned upstream, and the band must not escape it into
+   the frame (where it would also cover the sidebar's own controls). */
+html[data-platform='darwin'] [class*='_centerCol'] {
+  position: relative;
+}
+
 /* ---- blank-session shell layout ---------------------------------------- */
 
 /* The shipped hero phase centres the whole stack (hero + tray + card) in the

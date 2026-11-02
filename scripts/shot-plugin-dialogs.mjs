@@ -14,6 +14,7 @@ import { createRequire } from 'node:module'
 import { readFileSync, mkdirSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { startSessionGuard } from './lib/session-guard.mjs'
 
 const REPO = '/Users/zctech/Code/deepseek-harness'
 const here = dirname(fileURLToPath(import.meta.url))
@@ -30,6 +31,7 @@ const url = [...readFileSync(logPath, 'utf8').matchAll(/dsh web: (https?:\/\/\S+
 const dark = process.argv.includes('--dark')
 const suffix = dark ? '-dark' : ''
 
+const guard = startSessionGuard()
 const browser = await chromium.launch({ channel: 'chrome', headless: true })
 const context = await browser.newContext({
   viewport: { width: 1302, height: 740 },
@@ -192,4 +194,5 @@ if (await split.count() > 0) {
 
 console.log(JSON.stringify(out, null, 1))
 if (errors.length > 0) console.log('errors:', errors.slice(0, 4))
+await guard.release()
 await browser.close()

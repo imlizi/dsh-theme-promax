@@ -12,6 +12,7 @@ import { createRequire } from 'node:module'
 import { readFileSync, mkdirSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { startSessionGuard } from './lib/session-guard.mjs'
 
 const REPO = '/Users/zctech/Code/deepseek-harness'
 const here = dirname(fileURLToPath(import.meta.url))
@@ -45,6 +46,7 @@ const SHORTCUT_SNAPSHOT = {
   usingDefaults: true,
 }
 
+const guard = startSessionGuard()
 const browser = await chromium.launch({ channel: 'chrome', headless: !headed })
 const context = await browser.newContext({
   viewport: { width: 1302, height: 740 },
@@ -124,4 +126,5 @@ if (errors.length > 0) console.error(`console errors (${errors.length}):\n${erro
 console.log(`shot ${meta.width}x${meta.height} → ${outPath}`)
 console.log(JSON.stringify(rects, null, 1))
 
+await guard.release()
 await browser.close()

@@ -14,6 +14,7 @@ import { createRequire } from 'node:module'
 import { readFileSync, mkdirSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { startSessionGuard } from './lib/session-guard.mjs'
 
 const REPO = '/Users/zctech/Code/deepseek-harness'
 const here = dirname(fileURLToPath(import.meta.url))
@@ -35,6 +36,7 @@ const check = (name, ok, detail = '') => {
   console.log(`${ok ? 'PASS' : 'FAIL'}  ${name}${detail === '' ? '' : `  — ${detail}`}`)
 }
 
+const guard = startSessionGuard()
 const browser = await chromium.launch({ channel: 'chrome', headless: true })
 const context = await browser.newContext({
   viewport: { width: 1302, height: 740 },
@@ -183,5 +185,6 @@ if (failed.length > 0) console.log(`失败：${failed.map(f => f.name).join('、
 console.log(`控制台错误 ${errors.length} 条`)
 if (errors.length > 0) console.log(errors.slice(0, 4).join('\n'))
 
+await guard.release()
 await browser.close()
 process.exit(failed.length === 0 ? 0 : 1)

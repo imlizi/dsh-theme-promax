@@ -14,6 +14,8 @@ import { readFileSync, mkdirSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
+import { startSessionGuard } from './lib/session-guard.mjs'
+
 const REPO = '/Users/zctech/Code/deepseek-harness'
 const here = dirname(fileURLToPath(import.meta.url))
 const root = resolve(here, '..')
@@ -29,6 +31,7 @@ const url = [...readFileSync(logPath, 'utf8').matchAll(/dsh web: (https?:\/\/\S+
 const dark = process.argv.includes('--dark')
 const suffix = dark ? '-dark' : ''
 
+const guard = startSessionGuard()
 const browser = await chromium.launch({ channel: 'chrome', headless: true })
 const context = await browser.newContext({
   viewport: { width: 1302, height: 740 },
@@ -119,6 +122,7 @@ await page.waitForTimeout(800)
 const guide = page.locator('button', { hasText: '模式说明' }).first()
 if (await guide.count() === 0) {
   console.log('no guide button; the settings page did not open')
+  await guard.release()
   await browser.close()
   process.exit(1)
 }
@@ -128,6 +132,7 @@ await page.waitForTimeout(800)
 const report = await measure()
 if (report === null) {
   console.log('no segmented tabs in the guide dialog')
+  await guard.release()
   await browser.close()
   process.exit(1)
 }
@@ -139,4 +144,5 @@ await page.screenshot({
 })
 console.log(JSON.stringify(report, null, 1))
 if (errors.length > 0) console.log('errors:', errors.slice(0, 3))
+await guard.release()
 await browser.close()
