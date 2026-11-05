@@ -108,6 +108,36 @@ html[data-platform='darwin'] [class*='_centerCol'] {
   pointer-events: none;
 }
 
+/* ---- right sidebar fullscreen controls --------------------------------- */
+
+/* Like the split glyph, both fullscreen glyphs are host-owned inline SVGs.
+   The mode names the destination, so fullscreen enters and push exits. */
+[data-sidebar-right-panel] [data-sidebar-right-mode] {
+  position: relative;
+}
+
+[data-sidebar-right-panel] [data-sidebar-right-mode] > svg {
+  visibility: hidden;
+}
+
+[data-sidebar-right-panel] [data-sidebar-right-mode]::after {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  background: currentColor;
+  mask: var(--skin-fullscreen-icon) center / contain no-repeat;
+  pointer-events: none;
+}
+
+[data-sidebar-right-panel] [data-sidebar-right-mode='fullscreen'] {
+  --skin-fullscreen-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill-rule='evenodd' d='M12 7a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v4a1 1 0 1 1-2 0V8h-3a1 1 0 0 1-1-1Zm-5 5a1 1 0 0 1 1 1v3h3a1 1 0 1 1 0 2H7a1 1 0 0 1-1-1v-4a1 1 0 0 1 1-1Z' clip-rule='evenodd'/%3E%3C/svg%3E");
+}
+
+[data-sidebar-right-panel] [data-sidebar-right-mode='push'] {
+  --skin-fullscreen-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 14C5 13.4477 5.44772 13 6 13H10C10.5523 13 11 13.4477 11 14V18C11 18.5523 10.5523 19 10 19C9.44771 19 9 18.5523 9 18V15H6C5.44772 15 5 14.5523 5 14Z'/%3E%3Cpath d='M14 5C14.5523 5 15 5.44772 15 6V9H18C18.5523 9 19 9.44771 19 10C19 10.5523 18.5523 11 18 11H14C13.4477 11 13 10.5523 13 10V6C13 5.44772 13.4477 5 14 5Z'/%3E%3C/svg%3E");
+}
+
 /* ---- blank-session shell layout ---------------------------------------- */
 
 /* The shipped hero phase centres the whole stack (hero + tray + card) in the
