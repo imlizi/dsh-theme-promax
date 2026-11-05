@@ -85,6 +85,24 @@ html[data-platform='darwin'] [class*='_centerCol'] {
   position: relative;
 }
 
+/* ---- right sidebar tab strip -------------------------------------------- */
+
+/* Dockkit's 38px strip places its 28px content band at the bottom with 10px
+   top padding. Keep its height and horizontal insets, but share the 10px
+   vertically so the tabs and every strip-end control sit on the midline. */
+[data-sidebar-right-panel] [data-dockkit-strip] {
+  box-sizing: border-box;
+  height: 38px;
+  padding-block: 5px;
+  align-items: center;
+}
+
+/* Avoid an inline span's text baseline shifting the split button in the row. */
+[data-sidebar-right-panel] [data-dockkit-strip] [data-dockkit-split-control] {
+  display: flex;
+  align-items: center;
+}
+
 /* ---- right sidebar split control ---------------------------------------- */
 
 /* The host draws this glyph inline rather than through its icon sprite. Keep
