@@ -1,6 +1,6 @@
 {
   "name": "dsh-theme-promax",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
   "description": "Desktop UI skin for dsh: 1:1 reproduction of the reference first screen and sidebar",
