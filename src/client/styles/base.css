@@ -74,9 +74,8 @@ html[data-platform='darwin'] [data-window-drag] :is(input, textarea, [contentedi
   inset: 0 0 auto;
   height: 48px;
   pointer-events: none;
-  /* A box that paints nothing has no region to collect, and 8-bit alpha rounds
-     0.001 to zero: one alpha step is the faintest paint that still exists. */
-  background: rgba(0, 0, 0, 0.004);
+  /* Share the sidebar surface without changing native drag geometry. */
+  background: var(--skin-sidebar-bg);
 }
 
 /* The column is not positioned upstream, and the band must not escape it into
@@ -387,7 +386,7 @@ html[data-platform='darwin'] [class*='_centerCol'] {
    `html[data-platform]` prefix is load-bearing: the shipped rule is a
    four-compound darwin selector, so a bare attribute selector would lose. */
 html[data-platform] [class*='_frame']:not([data-sidebar-drawer]) [class*='_sidebarCol'] {
-  background: #FBFBFB;
+  background: var(--skin-sidebar-bg);
 }
 
 /* The separator belongs to the centre column on darwin; the reference draws it
