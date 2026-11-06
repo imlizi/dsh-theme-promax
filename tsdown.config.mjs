@@ -59,7 +59,8 @@ const clientFace = {
   entry: { client: 'src/client/index.ts' },
   outDir: 'lib',
   format: ['cjs'],
-  platform: 'browser',
+  // Explicit input platform keeps the closure browser-targeted with CJS output.
+  inputOptions: { platform: 'browser' },
   target: 'es2022',
   dts: false,
   clean: false,

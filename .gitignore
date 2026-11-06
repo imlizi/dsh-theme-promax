@@ -1,5 +1,7 @@
 .DS_Store
 node_modules/
+.pnpm-store/
+.dsh-meow/
 .workbuddy-ai/
 .workbuddy/
 # editor temp copies (e.g. base.css4q2uUv)

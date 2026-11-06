@@ -71,14 +71,21 @@ pnpm dsh web --patch /path/to/Promax/cordis.patch.yml
 
 ## 本地构建
 
-修改 `src/` 后重新生成 `lib/`：
+源码开发需要 Node.js `^22.18.0 || ^24.11.0 || >=26.0.0` 和 pnpm `12.15.0`（见 `package.json` 的 `packageManager`）。这是构建工具的要求，不代表已验证的最低 DSH Desktop 版本。
+
+首次检出先安装锁定依赖；修改 `src/` 后重新生成 `lib/`：
 
 ```sh
-pnpm build      # 等价于 tsdown
-pnpm watch      # 监听重建
+pnpm install --frozen-lockfile --ignore-scripts
+pnpm check     # 先构建，再对新产物运行宿主兼容检查
+pnpm build     # 仅构建，使用项目内锁定的 tsdown
+pnpm test      # 仅检查现有 lib/client.js，不重建
+pnpm watch     # 监听重建
 ```
 
-仓库不带 `devDependencies`，`tsdown` 用现成的即可（`npx tsdown`，或 DSH 检出里的 `node_modules/.bin/tsdown`）。
+`tsdown` 作为开发依赖固定版本，传递依赖由 `pnpm-lock.yaml` 锁定，不再依赖全局工具或另一份 DSH 源码目录。安装命令禁用依赖生命周期脚本；当前构建直接使用随包分发的平台原生绑定。
+
+`pnpm check` 的兼容检查使用模拟 DOM，不连接 DSH、不创建或清理会话；它不覆盖真实桌面窗口拖拽、亮暗视觉、交互和插件卸载恢复。浏览器截图与冒烟脚本仍需单独准备宿主环境，不包含在默认检查中。
 
 产物两份：
 
@@ -118,7 +125,7 @@ scripts/                量取参考图、截图、像素比对的辅助脚本
 | 下拉菜单 | `[role='menu']` 作用域下的 CSS：卡片填充/圆角/阴影走变量，行、图标、分隔线走元素选择器 |
 | 分段标签 | `[role='tablist'] > [class*='_indicator']`：只改选中胶囊的面色，不动轨道 token |
 | 窗口拖拽区 | 两件事：① `[data-window-drag]` 作用域下加 `user-select: none`（输入框/可编辑区 `user-select: text` 放行），拖拽没命中时不再变成选中文字；② 客户端插一条 `<div class="skin-drag-band" data-window-drag>` 到中间列的首个子节点，48px 高、`pointer-events: none`，把宿主的行没有铺满的顶边补齐（插件页 pageHead 只有 925/1021，两侧留白不属于任何行）。带 `data-window-drag` 是为了让宿主那条唯一的 drag 规则和它的重采逻辑同时认这条带；首子节点是为了「后收集的盒子决定归属」——带下面的控件（会话头右上开关、插件工具栏）仍先被命中 |
-| 侧边栏外壳 | 组合方式：禁用 `ui-sidebar` 行，由本 bundle 注册 `sidebar`（规划中） |
+| 侧边栏外壳 | 沿用宿主侧边栏，通过 CSS 调整行高、搜索框和表面样式；不注册替代 sidebar |
 
 ## 已知差异
 

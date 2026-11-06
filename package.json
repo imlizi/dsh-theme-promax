@@ -31,8 +31,14 @@
       ]
     }
   },
+  "packageManager": "pnpm@12.15.0",
   "scripts": {
     "build": "tsdown",
-    "watch": "tsdown --watch"
+    "watch": "tsdown --watch",
+    "test": "node scripts/host-compat.mjs",
+    "check": "pnpm run build && pnpm run test"
+  },
+  "devDependencies": {
+    "tsdown": "0.23.5"
   }
 }
